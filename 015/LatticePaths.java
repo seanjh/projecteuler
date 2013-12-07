@@ -11,14 +11,22 @@
 
 import java.util.Deque;
 import java.util.LinkedList;
+import java.text.DecimalFormat;
+import java.util.Scanner;
 
 public class LatticePaths {
-    static final int SIZE = 10;
+    //static final int SIZE = 20;
     public static void main(String[] args) {
+
+        Scanner input = new Scanner(System.in);
+        System.out.print("Specify the dimensions of the grid (e.g., 2) >> ");
+        int size = input.nextInt();
+
+        long start = System.currentTimeMillis();
 
         // 2-dimensional array, with each element representing a vertex.
         // A 2x2 lattice has 3 total (SIZE + 1) vertices.
-        Integer[][] lattice = new Integer[SIZE+1][SIZE+1];
+        Integer[][] lattice = new Integer[size + 1][size + 1];
 
         // Populate the lattice with cell values
         int cellNum = 0;
@@ -29,54 +37,60 @@ public class LatticePaths {
             }
         }
 
-        BinaryTree<Location> bt = new BinaryTree<Location>(new Location(0,0));
-        Deque<BinaryNode<Location>> queue = new LinkedList<BinaryNode<Location>>();
-        queue.addLast(bt.getRoot()); // initialize the stack with the Tree's root Node
+        //BinaryTree<Location> bt = new BinaryTree<Location>(new Location(0,0));
+        Deque<Location> queue = new LinkedList<Location>();
+        queue.addLast(new Location(0,0)); // initialize the stack with the Tree's root Node
         int routes = 0;
 
         // Move through the lattice.
         // At each location, try to move left (x+1, y) and to move right (x, y+1)
         // Valid moves from each location are new branches on the tree
         while (queue.peekFirst() != null) {
-            BinaryNode<Location> currentNode = queue.peek();
+            Location currentLocation = queue.peek();
             queue.removeFirst();
+            
             Location newLocation;
-            BinaryNode<Location> newNode;
+            //BinaryNode<Location> newNode;
 
             //System.out.println("Checking " + currentNode.getInfo() + "\n");
 
-            if (canMoveLeft(currentNode.getInfo(), lattice)) {
+            if (canMoveLeft(currentLocation, lattice)) {
                 // Connect a new left Node
                 newLocation = new Location(
-                    currentNode.getInfo().getX() + 1,
-                    currentNode.getInfo().getY()
+                    currentLocation.getX() + 1,
+                    currentLocation.getY()
                     );
-                newNode = new BinaryNode(newLocation);
-                currentNode.setLeft(newNode);
+                //newNode = new BinaryNode(newLocation);
+                //currentNode.setLeft(newNode);
                 // Queue the new Node
-                queue.addLast(newNode);
+                queue.addLast(newLocation);
             }
 
-            if (canMoveRight(currentNode.getInfo(), lattice)) {
+            if (canMoveRight(currentLocation, lattice)) {
                 // Connect a new right Node
                 newLocation = new Location(
-                    currentNode.getInfo().getX(),
-                    currentNode.getInfo().getY() + 1
+                    currentLocation.getX(),
+                    currentLocation.getY() + 1
                     );
-                newNode = new BinaryNode(newLocation);
-                currentNode.setRight(newNode);
+                //newNode = new BinaryNode(newLocation);
+                //currentNode.setRight(newNode);
                 // Queue the new Node
-                queue.addLast(newNode);
+                queue.addLast(newLocation);
             }
 
-            if (currentNode.getInfo().getX() == LatticePaths.SIZE && 
-                currentNode.getInfo().getY() == LatticePaths.SIZE) {
+            if (currentLocation.getX() == size && 
+                currentLocation.getY() == size) {
                 routes++;
-                System.out.print("\rCompleted route #" + routes);
+                System.out.print("\rCompleted route # " + routes);
             }
         }
 
-        System.out.println("\nTotal routes: " + routes);      
+        long finish = System.currentTimeMillis();
+        DecimalFormat df = new DecimalFormat("#.#");
+
+        double runtime = (finish - start) / 1000.0;
+
+        System.out.printf("\nCompleted %d routes in %f seconds.\n", routes, runtime);      
     }
 
     public static boolean canMoveLeft(Location loc, Integer[][] lattice) {
